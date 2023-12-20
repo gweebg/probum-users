@@ -1,0 +1,28 @@
+db:
+  host: ""
+  user: ""
+  password: ""
+  dbname: ""
+  port: 5432
+  tz: "Europe/Lisbon"
+
+app:
+  port: 3000
+
+endpoints:
+
+  auth:
+    base:
+      "localhost:7000/v1/auth"
+
+    signup:
+      uri: "/signup"
+      method: "POST"
+
+    delete:
+      uri: "/delete"
+      method: "DELETE"
+
+    update:
+      uri: "/update"
+      method: "PATCH"
