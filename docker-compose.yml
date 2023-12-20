@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:latest
+
+    container_name: probum-users-db
+
+    environment:
+      POSTGRES_USER: guilherme
+      POSTGRES_PASSWORD: users
+      POSTGRES_DB: users
+      TZ: Europe/Lisbon
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

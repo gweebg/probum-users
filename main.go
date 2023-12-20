@@ -2,10 +2,14 @@ package main
 
 import (
 	"flag"
-	"github.com/gweebg/probum-users/config"
-	"github.com/gweebg/probum-users/database"
+	"github.com/gweebg/probum-users/models"
+	"github.com/gweebg/probum-users/utils"
 	"log"
 	"os"
+
+	"github.com/gweebg/probum-users/config"
+	"github.com/gweebg/probum-users/database"
+	"github.com/gweebg/probum-users/server"
 )
 
 func main() {
@@ -21,7 +25,10 @@ func main() {
 	config.Init(*environment)
 
 	database.ConnectDatabase()
-	database.MigrateDatabase()
+
+	db := database.GetDatabase()
+	err := db.AutoMigrate(&models.User{})
+	utils.Check(err, "")
 
 	server.Init()
 

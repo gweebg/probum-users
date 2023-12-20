@@ -2,9 +2,10 @@ package database
 
 import (
 	"fmt"
+
 	"github.com/gweebg/probum-users/config"
-	"github.com/gweebg/probum-users/models"
 	"github.com/gweebg/probum-users/utils"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -15,11 +16,6 @@ func ConnectDatabase() {
 	var err error
 
 	db, err = gorm.Open(postgres.Open(dsnFromConfig()), &gorm.Config{})
-	utils.Check(err, "")
-}
-
-func MigrateDatabase() {
-	err := db.AutoMigrate(&models.User{})
 	utils.Check(err, "")
 }
 

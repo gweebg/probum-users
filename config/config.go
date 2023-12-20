@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/gweebg/probum-users/utils"
+
 	"github.com/spf13/viper"
 )
 

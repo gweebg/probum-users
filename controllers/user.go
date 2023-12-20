@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gweebg/probum-users/forms"
 	"github.com/gweebg/probum-users/models"
-	"net/http"
 )
 
 type UserController struct{}
@@ -21,7 +22,7 @@ func (u UserController) GetUser(c *gin.Context) {
 
 			c.JSON(http.StatusNotFound, gin.H{
 				"message": "user not found",
-				"error":   err,
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return
@@ -43,13 +44,16 @@ func (u UserController) GetUser(c *gin.Context) {
 
 }
 
+func (u UserController) CreateUser(c *gin.Context) {
+	return
+}
+
 func updateFormHandler(c *gin.Context) (forms.UserUpdate, error) {
 
 	var info forms.UserUpdate
 	err := c.ShouldBindJSON(&info)
 
 	return info, err
-
 }
 
 func (u UserController) UpdateUser(c *gin.Context) {
@@ -61,7 +65,7 @@ func (u UserController) UpdateUser(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "could not unmarshal json payload into 'forms.UserUpdate'",
-				"error":   err,
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return
@@ -71,7 +75,7 @@ func (u UserController) UpdateUser(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "could not update user information",
-				"error":   err,
+				"error":   err.Error(),
 			})
 			c.Abort()
 			return

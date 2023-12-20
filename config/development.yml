@@ -1,13 +1,13 @@
 db:
-  host: ""
-  user: ""
-  password: ""
-  dbname: ""
+  host: "localhost"
+  user: "guilherme"
+  password: "users"
+  dbname: "users"
   port: 5432
   tz: "Europe/Lisbon"
 
 app:
-  port: 3000
+  port: ":3000"
 
 endpoints:
 

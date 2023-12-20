@@ -1,11 +1,12 @@
 package models
 
 import (
+	"gorm.io/gorm"
+
 	"github.com/gweebg/probum-users/config"
 	"github.com/gweebg/probum-users/database"
 	"github.com/gweebg/probum-users/forms"
 	"github.com/gweebg/probum-users/utils"
-	"gorm.io/gorm"
 )
 
 type User struct {
