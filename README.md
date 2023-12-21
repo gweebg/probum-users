@@ -1,14 +1,14 @@
 ## Probum - User Management Service
 
-### Service Operations:
+**Note**: To check each operation for this service, refer to its Swagger documentation ([Swagger Docs](127.0.0.1:3000/docs)).
 
 ### Service Dependencies:
 
-| Application | Version |
-| ----------- |:-------:|
-| `docker` | >= 24.0.7 |
-| `docker-compose` | >= 1.29.2 |
-| `go` | >= 1.21.1
+| Application      | Version  |
+|------------------|:--------:|
+| `docker`         | ≥ 24.0.7 |
+| `docker-compose` | ≥ 1.29.2 |
+| `go`             | ≥ 1.21.1 |
 
 ### Service Configuration:
 
@@ -21,7 +21,10 @@ Setting up the Postgres database:
 ```sh
 docker-compose up
 ```
-Now the database should be up and running, assible at port `5432`.
+Now the database should be up and running, accessible at port `5432`.
+The seeding for the database, happens only once, when the database is empty. This is, the seeding occurs at the first migration.
+
+To re-seed the database, you will need to drop the table for the `users` and re-run the migration sequence.
 
 ---
 Installing `go`'s dependencies using the `Makefile`:
@@ -34,8 +37,9 @@ Running the service:
 make run
 ```
 
----
-Running the service with `CompileDaemon`: 
+The default port set on the configuration file, is `3000`. If not changed, the service should be available [here](127.0.0.1:3000).
+
+To run the service in a development mode with hot-reload (`CompileDaemon`): 
 ```sh
 make daemon
 ```
