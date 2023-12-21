@@ -8,10 +8,20 @@ import (
 	"github.com/gweebg/probum-users/models"
 )
 
+// @BasePath /api/v1
+
 type UserController struct{}
 
 var userModel = new(models.User)
 
+// GetUser retrieves a user from the database using their school identification.
+// @Summary Retrieve User by School ID
+// @Description Retrieves a user from the database based on the school identification (pg|a[0-9]\d{10}).
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Router /user/{id} [get]
 func (u UserController) GetUser(c *gin.Context) {
 
 	userId := c.Param("id")

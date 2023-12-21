@@ -3,14 +3,15 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/gweebg/probum-users/models"
-	"github.com/gweebg/probum-users/seeder"
-	"gorm.io/gorm"
 	"log"
 	"os"
 
+	"gorm.io/gorm"
+
 	"github.com/gweebg/probum-users/config"
 	"github.com/gweebg/probum-users/database"
+	"github.com/gweebg/probum-users/models"
+	"github.com/gweebg/probum-users/seeder"
 	"github.com/gweebg/probum-users/server"
 )
 

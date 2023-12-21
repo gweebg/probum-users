@@ -1,6 +1,10 @@
 package server
 
 import (
+	docs "github.com/gweebg/probum-users/docs"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gweebg/probum-users/controllers"
 )
@@ -12,11 +16,9 @@ func NewRouter() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
-	//health := new(controllers.HealthController)
-	//router.GET("/health", health.Status)
-	//router.Use(middlewares.AuthMiddleware())
+	docs.SwaggerInfo.BasePath = "/api/v1"
 
-	v1 := router.Group("v1")
+	v1 := router.Group("api/v1")
 	{
 		userGroup := v1.Group("user")
 		{
@@ -26,6 +28,8 @@ func NewRouter() *gin.Engine {
 			userGroup.PATCH("/:id", user.UpdateUser)
 		}
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	return router
 }

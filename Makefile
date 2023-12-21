@@ -26,6 +26,11 @@ run-prod: build
 clean:
 	@rm -f $(NAME)
 
+.PHONE: docs
+## docs: Generate Swagger documentation
+docs:
+	@swag init .
+
 .PHONY: deps
 ## deps: Download modules
 deps:
