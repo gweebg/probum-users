@@ -1,6 +1,6 @@
 ## Probum - User Management Service
 
-**Note**: To check each operation for this service, refer to its Swagger documentation ([Swagger Docs](127.0.0.1:3000/docs)).
+**Note**: To check each operation for this service, refer to its Swagger documentation ([Swagger Docs](http://127.0.0.1:3000/docs)).
 
 ### Service Dependencies:
 
@@ -37,7 +37,7 @@ Running the service:
 make run
 ```
 
-The default port set on the configuration file, is `3000`. If not changed, the service should be available [here](127.0.0.1:3000).
+The default port set on the configuration file, is `3000`. If not changed, the service should be available [here](http://127.0.0.1:3000).
 
 To run the service in a development mode with hot-reload (`CompileDaemon`): 
 ```sh
