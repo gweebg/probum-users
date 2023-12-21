@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"github.com/gweebg/probum-users/models"
-	"github.com/gweebg/probum-users/utils"
+	"github.com/gweebg/probum-users/seeder"
+	"gorm.io/gorm"
 	"log"
 	"os"
 
@@ -27,8 +29,15 @@ func main() {
 	database.ConnectDatabase()
 
 	db := database.GetDatabase()
-	err := db.AutoMigrate(&models.User{})
-	utils.Check(err, "")
+
+	if err := db.AutoMigrate(&models.User{}); err == nil && db.Migrator().HasTable(&models.User{}) {
+		if err := db.First(&models.User{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+
+			s := seeder.New("seeder/seed_data/users.json")
+			s.Seed()
+
+		}
+	}
 
 	server.Init()
 

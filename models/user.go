@@ -1,22 +1,24 @@
 package models
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/gweebg/probum-users/config"
 	"github.com/gweebg/probum-users/database"
 	"github.com/gweebg/probum-users/forms"
 	"github.com/gweebg/probum-users/utils"
+	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
 
-	Id    string `gorm:"primaryKey"`
-	Email string `gorm:"unique;index"`
+	UId   string `gorm:"primaryKey" json:"UId"`
+	Email string `gorm:"unique;index" json:"Email"`
 
-	Name string `gorm:"size:255"`
-	Role string `gorm:"size:31"`
+	Name string `gorm:"size:255" json:"Name"`
+	Role string `gorm:"size:31" json:"Role"`
+
+	CreatedAt int64 `gorm:"autoCreateTime"`
+	UpdatedAt int64 `gorm:"autoUpdateTime:milli"`
 }
 
 func (u User) GetUserById(id string) (*User, error) {
@@ -25,7 +27,7 @@ func (u User) GetUserById(id string) (*User, error) {
 
 	var user User
 
-	if err := db.First(&user, id).Error; err != nil {
+	if err := db.First(&user, "uid", id).Error; err != nil {
 		return nil, err
 	}
 
@@ -38,7 +40,7 @@ func (u User) Signup(userPayload forms.UserSignup) (*User, error) {
 	db := database.GetDatabase()
 
 	user := User{
-		Id:    userPayload.Id,
+		UId:   userPayload.UId,
 		Email: userPayload.Email,
 		Name:  userPayload.Name,
 		Role:  userPayload.Role,
@@ -50,7 +52,7 @@ func (u User) Signup(userPayload forms.UserSignup) (*User, error) {
 
 	headers := map[string]string{}
 	authUser := forms.AuthUser{
-		Id:       userPayload.Id,
+		UId:      userPayload.UId,
 		Password: userPayload.Password,
 	}
 
