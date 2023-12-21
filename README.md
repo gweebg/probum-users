@@ -1,8 +1,13 @@
 ## Probum - User Management Service
 
-**Note**: To check each operation for this service, refer to its Swagger documentation ([Swagger Docs](http://127.0.0.1:3000/docs)).
+Probum user management service, allows for user creation, deletes, updates. This service does not handle user authentication or
+authorization, refer to the Authentication service for that. Password hashes are also not stored in this service database.
+
+**Note**: To check each operation for this service, refer to its Swagger documentation ([Swagger Docs](http://127.0.0.1:3000/swagger/index.html)).
 
 ### Service Dependencies:
+
+To compile and run the service, you must have present the following dependencies:
 
 | Application      | Version  |
 |------------------|:--------:|
@@ -12,12 +17,51 @@
 
 ### Service Configuration:
 
-Each and every configuration aspect of the service (mainly others endpoints, database settings) can be set in `/config/development.yml`.
+Before starting the service, you must configure the application via the configuration file located at `/config/development.yml`. This 
+allows for database secret definition and other microservice related settings.
+
 The environmental variable values from the `docker-compose` and the configuration file, relative to database settings, must match.
+
+Here, follows an example configuration file: 
+```yaml
+
+# Database configuration
+db:
+  host: "host"
+  user: "user"
+  password: "password"
+  dbname: "userdb"
+  port: 5432
+  tz: "Europe/Lisbon"
+
+app:
+  port: ":3000" # Can be replaced by another address if desired.
+
+# Other microservices endpoint to ease communication.
+endpoints:
+
+  auth:
+    
+    # Base URL for the auth microservice
+    base:
+      "localhost:7000/v1/auth"
+
+    signup:
+      uri: "/signup"
+      method: "POST"
+
+    delete:
+      uri: "/delete"
+      method: "DELETE"
+
+    update:
+      uri: "/update"
+      method: "PATCH" 
+```
 
 ### Running the Service:
 
-Setting up the Postgres database:
+First of all, we need to set up the Postgres database with the command:
 ```sh
 docker-compose up
 ```
@@ -27,19 +71,21 @@ The seeding for the database, happens only once, when the database is empty. Thi
 To re-seed the database, you will need to drop the table for the `users` and re-run the migration sequence.
 
 ---
-Installing `go`'s dependencies using the `Makefile`:
+Next, we install `go`'s dependencies using the `Makefile`:
 ```sh
 make deps
 ```
+
 ---
-Running the service:
+Before running the service we should first generate the documentation:
 ```sh
+make docs
 make run
 ```
 
-The default port set on the configuration file, is `3000`. If not changed, the service should be available [here](http://127.0.0.1:3000).
+The default port set on the configuration file, is `:3000`. If not changed, the service should be available [here](http://127.0.0.1:3000).
 
-To run the service in a development mode with hot-reload (`CompileDaemon`): 
+(Optional) To run the service in a development mode with hot-reload (`CompileDaemon`): 
 ```sh
 make daemon
 ```

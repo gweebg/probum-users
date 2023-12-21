@@ -1,10 +1,8 @@
 package models
 
 import (
-	"github.com/gweebg/probum-users/config"
 	"github.com/gweebg/probum-users/database"
 	"github.com/gweebg/probum-users/forms"
-	"github.com/gweebg/probum-users/utils"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +19,7 @@ type User struct {
 	UpdatedAt int64 `gorm:"autoUpdateTime:milli"`
 }
 
-func (u User) GetUserById(id string) (*User, error) {
+func (u User) Get(id string) (*User, error) {
 
 	db := database.GetDatabase()
 
@@ -34,9 +32,8 @@ func (u User) GetUserById(id string) (*User, error) {
 	return &user, nil
 }
 
-func (u User) Signup(userPayload forms.UserSignup) (*User, error) {
+func (u User) Create(userPayload forms.UserSignup) (*User, error) {
 
-	c := config.GetConfig()
 	db := database.GetDatabase()
 
 	user := User{
@@ -50,30 +47,30 @@ func (u User) Signup(userPayload forms.UserSignup) (*User, error) {
 		return nil, err
 	}
 
-	headers := map[string]string{}
-	authUser := forms.AuthUser{
-		UId:      userPayload.UId,
-		Password: userPayload.Password,
-	}
-
-	_, err := utils.SendHTTPRequest(
-		c.GetString("endpoints.auth.signup.method"),
-		c.GetString("endpoints.auth.base")+c.GetString("endpoints.auth.signup.uri"),
-		headers, authUser,
-	)
-	if err != nil {
-		return nil, err
-	}
+	// todo: move microservice call to controller instead of model
+	// headers := map[string]string{}
+	// authUser := forms.AuthUser{
+	// 	UId:      userPayload.UId,
+	// 	Password: userPayload.Password,
+	// }
+	//
+	// _, err := utils.SendHTTPRequest(
+	// 	c.GetString("endpoints.auth.signup.method"),
+	// 	c.GetString("endpoints.auth.base")+c.GetString("endpoints.auth.signup.uri"),
+	// 	headers, authUser,
+	// )
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	return &user, nil
 }
 
 func (u User) Update(userId string, userPayload forms.UserUpdate) (*User, error) {
 
-	//c := config.GetConfig()
 	db := database.GetDatabase()
 
-	user, err := u.GetUserById(userId)
+	user, err := u.Get(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -83,10 +80,6 @@ func (u User) Update(userId string, userPayload forms.UserUpdate) (*User, error)
 	}
 	if userPayload.Email != nil {
 		user.Email = *userPayload.Email
-	}
-
-	if userPayload.Password != nil {
-		// todo: if password is != nil then send request to auth service
 	}
 
 	db.Save(user)

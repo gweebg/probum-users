@@ -24,6 +24,7 @@ func NewRouter() *gin.Engine {
 		{
 			user := new(controllers.UserController)
 
+			userGroup.POST("/", user.CreateUser)
 			userGroup.GET("/:id", user.GetUser)
 			userGroup.PATCH("/:id", user.UpdateUser)
 		}

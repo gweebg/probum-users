@@ -8,26 +8,16 @@ import (
 	"github.com/gweebg/probum-users/models"
 )
 
-// @BasePath /api/v1
-
 type UserController struct{}
 
 var userModel = new(models.User)
 
-// GetUser retrieves a user from the database using their school identification.
-// @Summary Retrieve User by School ID
-// @Description Retrieves a user from the database based on the school identification (pg|a[0-9]\d{10}).
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param id path string true "User ID"
-// @Router /user/{id} [get]
 func (u UserController) GetUser(c *gin.Context) {
 
 	userId := c.Param("id")
 	if userId != "" {
 
-		user, err := userModel.GetUserById(userId)
+		user, err := userModel.Get(userId)
 		if err != nil {
 
 			c.JSON(http.StatusNotFound, gin.H{
@@ -39,11 +29,12 @@ func (u UserController) GetUser(c *gin.Context) {
 
 		}
 
+		// todo: add communication with authentication server
+
 		c.JSON(http.StatusOK, gin.H{
 			"user": user,
 		})
 		return
-
 	}
 
 	c.JSON(http.StatusBadRequest, gin.H{
@@ -55,15 +46,35 @@ func (u UserController) GetUser(c *gin.Context) {
 }
 
 func (u UserController) CreateUser(c *gin.Context) {
+
+	var newUser forms.UserSignup
+	err := c.ShouldBindJSON(&newUser)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "could not unmarshal request body into 'forms.UserSignup'",
+			"error":   err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	user, err := userModel.Create(newUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "could not add user to the database",
+			"error":   err.Error(),
+		})
+		c.Abort()
+		return
+	}
+
+	// todo: add communication with the auth microservice
+
+	c.JSON(http.StatusCreated, gin.H{
+		"user": user,
+	})
 	return
-}
-
-func updateFormHandler(c *gin.Context) (forms.UserUpdate, error) {
-
-	var info forms.UserUpdate
-	err := c.ShouldBindJSON(&info)
-
-	return info, err
 }
 
 func (u UserController) UpdateUser(c *gin.Context) {
@@ -71,17 +82,19 @@ func (u UserController) UpdateUser(c *gin.Context) {
 	userId := c.Param("id")
 	if userId != "" {
 
-		updateForm, err := updateFormHandler(c)
+		var userUpdate forms.UserUpdate
+		err := c.ShouldBindJSON(&userUpdate)
+
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "could not unmarshal json payload into 'forms.UserUpdate'",
+				"message": "could not unmarshal request body into 'forms.UserUpdate'",
 				"error":   err.Error(),
 			})
 			c.Abort()
 			return
 		}
 
-		user, err := userModel.Update(userId, updateForm)
+		user, err := userModel.Update(userId, userUpdate)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "could not update user information",
@@ -95,13 +108,13 @@ func (u UserController) UpdateUser(c *gin.Context) {
 			"user": user,
 		})
 		return
-
 	}
+
+	// todo: add communication with the auth microservice
 
 	c.JSON(http.StatusBadRequest, gin.H{
 		"message": "'id' is not specified",
 	})
 	c.Abort()
 	return
-
 }

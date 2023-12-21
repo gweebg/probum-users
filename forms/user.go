@@ -1,17 +1,17 @@
 package forms
 
 type UserSignup struct {
-	Name     string `json:"name" binding:"required"`
-	Email    string `json:"email" binding:"required"`
-	UId      string `json:"uid" binding:"required"`
+	Name     string `json:"name"     binding:"required"`
+	Email    string `json:"email"    binding:"required,email"`
+	UId      string `json:"uid"      binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Role     string `json:"role" binding:"required"`
+	Role     string `json:"role"     binding:"required,oneof=tech admin lstudent mstudent"`
 }
 
 type UserUpdate struct {
-	Name     *string `json:"name,omitempty"`
-	Email    *string `json:"email,omitempty"`
-	Password *string `json:"password,omitempty"`
+	Name     *string `json:"name,omitempty"     binding:"required"`
+	Email    *string `json:"email,omitempty"    binding:"required,email"`
+	Password *string `json:"password,omitempty" binding:"required"`
 }
 
 type AuthUser struct {
