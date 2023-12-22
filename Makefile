@@ -2,8 +2,8 @@ NAME=probum-users
 VERSION=0.0.1
 
 .PHONY: build
-## build: Compile the packages.
-build:
+## build: Compile the packages and the API documentation.
+build: docs
 	@go build -o $(NAME)
 
 .PHONY: run
@@ -22,14 +22,16 @@ run-prod: build
 	@./$(NAME) -e production
 
 .PHONY: clean
-## clean: Clean project and previous builds.
+## clean: Clean project, the generated documentation and previous builds.
 clean:
+	-@rm docs/swagger.*
+	-@rm docs/docs.go
 	@rm -f $(NAME)
 
-.PHONE: docs
+.PHONY: docs
 ## docs: Generate Swagger documentation
 docs:
-	@swag init .
+	@swag init -g docs/docgen.go -o ./docs --parseDependency true
 
 .PHONY: deps
 ## deps: Download modules
