@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 )
@@ -37,4 +38,9 @@ func SendHTTPRequest(method, url string, headers map[string]string, payload inte
 
 	client := &http.Client{}
 	return client.Do(req)
+}
+
+func HandleAbort(c *gin.Context, status int, message string, error string) {
+	c.JSON(status, gin.H{"message": message, "error": error})
+	c.Abort()
 }
