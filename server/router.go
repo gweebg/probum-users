@@ -38,12 +38,13 @@ func NewRouter() *gin.Engine {
 		{
 			user := new(controllers.UserController)
 
-			userGroup.POST("/", user.CreateUser)
+			userGroup.GET("/:id", user.Get)
 
 			userGroup.Use(middlewares.RequireAuth)
 			{
-				userGroup.GET("/:id", user.GetUser)
-				userGroup.PATCH("/:id", user.UpdateUser)
+				userGroup.GET("/", user.GetCurrent)
+				userGroup.POST("/", user.Create)
+				userGroup.PATCH("/", user.Update)
 			}
 		}
 	}

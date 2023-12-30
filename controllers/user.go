@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/gweebg/probum-users/config"
 	"github.com/gweebg/probum-users/utils"
 	"net/http"
 
@@ -13,15 +15,15 @@ type UserController struct{}
 
 var userModel = new(models.User)
 
-// GetUser       godoc
-// @Summary      Retrieve a user from the database.
-// @Description  Retrieves the user with the specified school id, as a json object.
+// Get           godoc
+// @Summary      Retrieve a user from the database
+// @Description  Retrieves the user (as a json object) with the specified school id. A school id follows the expression (pg|a)[1-9]\d{6}.
 // @Tags         users
 // @Produce      json
-// @Param        id  path      string  true  "search user by id"
+// @Param        id  path      string  true  "User id"
 // @Success      200   {object}  models.User
 // @Router       /user/{id} [get]
-func (u UserController) GetUser(c *gin.Context) {
+func (u UserController) Get(c *gin.Context) {
 
 	userId := c.Param("id")
 	if userId != "" {
@@ -42,46 +44,77 @@ func (u UserController) GetUser(c *gin.Context) {
 	return
 }
 
-// CreateUser    godoc
-// @Summary      Insert a user into the system.
-// @Description  When provided with a user object, this endpoint inserts it into the database if the id does not exist and the object is well formed.
+// GetCurrent    godoc
+// @Summary      Retrieve the current authenticated user.
+// @Description  Retrieves the user corresponding to the provided authentication jwt token.
 // @Tags         users
 // @Produce      json
-// @Param        user  body      forms.UserSignup  true  "signup user form"
 // @Success      200   {object}  models.User
+// @Security 	 BearerToken
+// @Router       /user [get]
+func (u UserController) GetCurrent(c *gin.Context) {
+
+	// If it got to this point, then 'user' is set in *gin.Context.
+	user, exists := c.Get("user")
+	if !exists {
+		utils.HandleAbort(c, http.StatusNotFound, "user not found, even though is authenticated", "")
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user": user.(*models.User),
+	})
+	return
+}
+
+// Create        godoc
+// @Summary      Insert a user into the system
+// @Description  When provided with a user object, this endpoint inserts it into the database if the id does not exist and the object is well-formed.
+// @Tags         users
+// @Produce      json
+// @Param        user  body      forms.UserSignup  true  "User signup json object"
+// @Success      200   {object}  models.User
+// @Security 	 BearerToken
 // @Router       /user [post]
-func (u UserController) CreateUser(c *gin.Context) {
+func (u UserController) Create(c *gin.Context) {
+
+	requester, _ := c.Get("user")
+	reqUser := requester.(*models.User)
+
+	// Check roles.
+	if reqUser.Role != "tech" && reqUser.Role != "admin" {
+		utils.HandleAbort(c, http.StatusUnauthorized, fmt.Sprintf("role '%s' is not allowed to create users\n", reqUser.Role), "")
+		return
+	}
 
 	// Decode form body.
 	var newUser forms.UserSignup
-	err := c.ShouldBindJSON(&newUser)
 
+	err := c.ShouldBindJSON(&newUser)
 	if err != nil {
 		utils.HandleAbort(c, http.StatusBadRequest, "could not unmarshal request body into 'forms.UserSignup'", err.Error())
 		return
 	}
 
 	// Send sign up request to authentication service.
+	conf := config.GetConfig()
 	cookie, _ := c.Cookie("Authorization") // cookie is set (verified at the middleware)
 
-	headers := map[string]string{
-		"Authorization": cookie,
-	}
+	header := map[string]string{"Authorization": cookie}
 	payload := struct {
-		UId      string
+		Id       string
 		Password string
-	}{
-		UId:      newUser.UId,
-		Password: newUser.Password,
-	}
+	}{Id: newUser.UId, Password: newUser.Password}
 
-	_, err = utils.SendHTTPRequest(
-		c.GetString("endpoints.auth.signup.method"),
-		c.GetString("endpoints.auth.base")+c.GetString("endpoints.auth.signup.uri"),
-		headers, payload,
+	response, err := utils.SendHTTPRequest(
+		conf.GetString("endpoints.auth.signup.method"),
+		conf.GetString("endpoints.auth.signup.method.base")+conf.GetString("endpoints.auth.signup.method.uri"),
+		header,
+		payload,
 	)
-	if err != nil {
-		utils.HandleAbort(c, http.StatusInternalServerError, "could not reach authentication server", err.Error())
+
+	if (err != nil) || (response.StatusCode != http.StatusCreated) {
+		utils.HandleAbort(c, http.StatusInternalServerError, "auth service not up or invalid request", err.Error())
 		return
 	}
 
@@ -98,33 +131,71 @@ func (u UserController) CreateUser(c *gin.Context) {
 	})
 }
 
-func (u UserController) UpdateUser(c *gin.Context) {
+// Update        godoc
+// @Summary      Update a user
+// @Description  When provided with a user object (complete or partial), the user specified in path is updated.
+// @Tags         users
+// @Produce      json
+// @Param        user  body      forms.UserSignup  true  "User update form"
+// @Success      200   {object}  models.User
+// @Security 	 BearerToken
+// @Router       /user [patch]
+func (u UserController) Update(c *gin.Context) {
 
-	userId := c.Param("id")
-	if userId != "" {
-
-		var userUpdate forms.UserUpdate
-		err := c.ShouldBindJSON(&userUpdate)
-
-		if err != nil {
-			utils.HandleAbort(c, http.StatusBadRequest, "could not unmarshal request body into 'forms.UserUpdate'", err.Error())
-			return
-		}
-
-		user, err := userModel.Update(userId, userUpdate)
-		if err != nil {
-			utils.HandleAbort(c, http.StatusInternalServerError, "could not update user information", err.Error())
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"user": user,
-		})
+	user, exists := c.Get("user")
+	if !exists {
+		utils.HandleAbort(c, http.StatusNotFound, "user not found, even though is authenticated", "")
 		return
 	}
 
-	// todo: add communication with the auth microservice
+	userObj := user.(*models.User)
 
-	utils.HandleAbort(c, http.StatusBadRequest, "field 'id' is not specified", "")
+	// Decoding the request body.
+	var userUpdate forms.UserUpdate
+
+	err := c.ShouldBindJSON(&userUpdate)
+	if err != nil {
+		utils.HandleAbort(c, http.StatusBadRequest, "could not unmarshal request body into 'forms.UserUpdate'", err.Error())
+		return
+	}
+
+	// Checking for password update and notify the auth service.
+	if userUpdate.Password != nil {
+
+		// Send sign up request to authentication service.
+		conf := config.GetConfig()
+		cookie, _ := c.Cookie("Authorization") // cookie is set (verified at the middleware)
+
+		header := map[string]string{"Authorization": cookie}
+		payload := struct {
+			Password string
+		}{Password: *userUpdate.Password}
+
+		response, err := utils.SendHTTPRequest(
+			conf.GetString("endpoints.auth.signup.method"),
+			conf.GetString("endpoints.auth.signup.method.base")+conf.GetString("endpoints.auth.signup.method.uri"),
+			header,
+			payload,
+		)
+
+		if (err != nil) || (response.StatusCode != http.StatusCreated) {
+			utils.HandleAbort(c, http.StatusInternalServerError, "auth service not up or invalid request", err.Error())
+			return
+		}
+
+	}
+
+	// Update the rest of the user.
+	userObj, err = userModel.Update(userObj.UId, userUpdate)
+	if err != nil {
+		utils.HandleAbort(c, http.StatusInternalServerError, "could not update user information", err.Error())
+		return
+	}
+
+	// Complete.
+	c.JSON(http.StatusOK, gin.H{
+		"user": userObj,
+	})
 	return
+
 }

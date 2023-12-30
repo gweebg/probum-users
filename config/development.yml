@@ -7,7 +7,7 @@ db:
   tz: "Europe/Lisbon"
 
 app:
-  port: ":3000"
+  listen: ":3000"
   # head /dev/urandom | tr -dc A-Za-z0-0 | openssl dgst -sha256
   jwt-secret: "10152ac15c5c8ac4bc48cb1dea05b0274e0f64577e6c760ed1f4d0e7730e0ad2"
 
@@ -15,16 +15,16 @@ endpoints:
 
   auth:
     base:
-      "localhost:7000/v1/auth"
+      "localhost:3000/v1/auth/"
 
     signup:
-      uri: "/signup"
+      uri: "user"
       method: "POST"
 
     delete:
-      uri: "/delete"
+      uri: "user"
       method: "DELETE"
 
     update:
-      uri: "/update"
+      uri: "user"
       method: "PATCH"

@@ -33,7 +33,7 @@ func RequireAuth(c *gin.Context) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected jwt signing method: " + token.Method.Alg())
 		}
-		return []byte(conf.GetString("jwt-secret")), nil
+		return []byte(conf.GetString("app.jwt-secret")), nil
 
 	})
 

@@ -10,6 +10,6 @@ func Init() {
 	conf := config.GetConfig()
 	router := NewRouter()
 
-	err := router.Run(conf.GetString("app.port"))
+	err := router.Run(conf.GetString("app.listen"))
 	utils.Check(err, "")
 }
