@@ -33,10 +33,8 @@ func main() {
 
 	if err := db.AutoMigrate(&models.User{}); err == nil && db.Migrator().HasTable(&models.User{}) {
 		if err := db.First(&models.User{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-
 			s := seeder.New("seeder/seed_data/users.json")
 			s.Seed()
-
 		}
 	}
 

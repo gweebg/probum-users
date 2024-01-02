@@ -10,21 +10,4 @@ app:
   listen: ":3000"
   # head /dev/urandom | tr -dc A-Za-z0-0 | openssl dgst -sha256
   jwt-secret: "10152ac15c5c8ac4bc48cb1dea05b0274e0f64577e6c760ed1f4d0e7730e0ad2"
-
-endpoints:
-
-  auth:
-    base:
-      "localhost:3000/v1/auth/"
-
-    signup:
-      uri: "user"
-      method: "POST"
-
-    delete:
-      uri: "user"
-      method: "DELETE"
-
-    update:
-      uri: "user"
-      method: "PATCH"
+  # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDQ3NTY2NjcsInN1YiI6InBnNTM4NTEifQ.2nhaFg4IK8tM0fsgBeIeJ1fFAOQixgCsnRHUpOxQyAM

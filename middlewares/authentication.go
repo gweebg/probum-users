@@ -1,14 +1,13 @@
 package middlewares
 
 import (
-	"github.com/gweebg/probum-users/config"
-	"github.com/gweebg/probum-users/models"
-
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
-
-	"errors"
+	"github.com/gweebg/probum-users/config"
+	"github.com/gweebg/probum-users/models"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -19,16 +18,18 @@ func RequireAuth(c *gin.Context) {
 	userModel := new(models.User)
 
 	// Get the cookie from the request.
-	cookie, err := c.Cookie("Authorization")
-	if err != nil {
+	bearer := c.GetHeader("Authorization")
+	if bearer == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "authorization cookie not set",
+			"message": "authorization token not set",
 		})
 		return
 	}
 
+	bearer = strings.Split(bearer, " ")[1]
+
 	// Decode and validate the cookie.
-	token, err := jwt.Parse(cookie, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(bearer, func(token *jwt.Token) (interface{}, error) {
 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected jwt signing method: " + token.Method.Alg())
@@ -37,13 +38,14 @@ func RequireAuth(c *gin.Context) {
 
 	})
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !(ok && token.Valid) {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "token is not valid",
+			"error":   err.Error(),
 		})
 		return
 	}
+	claims := token.Claims.(jwt.MapClaims)
 
 	// Check the expiration.
 	if float64(time.Now().Unix()) > claims["exp"].(float64) {

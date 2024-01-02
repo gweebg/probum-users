@@ -13,3 +13,8 @@ type UserUpdate struct {
 	Email    *string `json:"email,omitempty"    binding:"required,email"`
 	Password *string `json:"password,omitempty" binding:"required"`
 }
+
+type UserLogin struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
