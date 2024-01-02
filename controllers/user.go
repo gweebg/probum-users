@@ -43,20 +43,6 @@ func (u UserController) Get(c *gin.Context) {
 		return
 	}
 
-	utils.HandleAbort(c, http.StatusInternalServerError, "could not add user to the database", "")
-}
-
-// GetCurrent    godoc
-// @Summary      Retrieve the current authenticated user.
-// @Description  Retrieves the user corresponding to the provided authentication jwt token.
-// @Tags         users
-// @Produce      json
-// @Success      200   {object}  models.User
-// @Security 	 BearerToken
-// @Router       /user [get]
-func (u UserController) GetCurrent(c *gin.Context) {
-
-	// If it got to this point, then 'user' is set in *gin.Context.
 	user, exists := c.Get("user")
 	if !exists {
 		utils.HandleAbort(c, http.StatusNotFound, "user not found, even though is authenticated", "")

@@ -9,9 +9,9 @@ type UserSignup struct {
 }
 
 type UserUpdate struct {
-	Name     *string `json:"name,omitempty"     binding:"required"`
-	Email    *string `json:"email,omitempty"    binding:"required,email"`
-	Password *string `json:"password,omitempty" binding:"required"`
+	Name     *string `json:"name,omitempty"`
+	Email    *string `json:"email,omitempty"`
+	Password *string `json:"password,omitempty"`
 }
 
 type UserLogin struct {

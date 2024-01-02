@@ -59,7 +59,7 @@ func (s *Seeder) Seed() {
 		dbUser := models.User{
 			UId:      user.UId,
 			Email:    user.Email,
-			Name:     user.Email,
+			Name:     user.Name,
 			Role:     user.Role,
 			Password: hash,
 		}

@@ -43,7 +43,6 @@ func NewRouter() *gin.Engine {
 			userGroup.Use(middlewares.RequireAuth)
 			{
 				userGroup.GET("/:id", user.Get)
-				userGroup.GET("/", user.GetCurrent)
 				userGroup.PATCH("/", user.Update)
 				userGroup.POST("/", user.Create) // Needs to be protected, only Admins | Techs can create.
 			}
