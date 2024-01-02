@@ -35,28 +35,9 @@ db:
   tz: "Europe/Lisbon"
 
 app:
-  port: ":3000" # Can be replaced by another address if desired.
+  listen: ":3000"
+  jwt-secret: "your-jwt-secret"
 
-# Other microservices endpoint to ease communication.
-endpoints:
-
-  auth:
-    
-    # Base URL for the auth microservice
-    base:
-      "localhost:7000/v1/auth"
-
-    signup:
-      uri: "/signup"
-      method: "POST"
-
-    delete:
-      uri: "/delete"
-      method: "DELETE"
-
-    update:
-      uri: "/update"
-      method: "PATCH" 
 ```
 
 ### Running the Service:
@@ -71,15 +52,14 @@ The seeding for the database, happens only once, when the database is empty. Thi
 To re-seed the database, you will need to drop the table for the `users` and re-run the migration sequence.
 
 ---
-Next, we install `go`'s dependencies using the `Makefile`:
+Next, we install `go`'s dependencies:
 ```sh
-make deps
+go mod tidy
 ```
 
 ---
 Before running the service we should first generate the documentation:
 ```sh
-make docs
 make run
 ```
 
@@ -89,3 +69,5 @@ The default port set on the configuration file, is `:3000`. If not changed, the 
 ```sh
 make daemon
 ```
+
+**Note:** Both commands above generate the `swagger` documentation for the API.
